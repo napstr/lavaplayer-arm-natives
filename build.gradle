@@ -1,0 +1,85 @@
+plugins {
+    id 'com.jfrog.bintray' version '1.8.4'
+    id 'java'
+    id 'maven'
+    id 'maven-publish'
+}
+
+def versionObj = new Version(major: 1, minor: 3, revision: 10)
+
+group 'com.github.natanbc'
+version "${versionObj}"
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+jar {
+    baseName = project.name
+    manifest {
+        attributes 'Implementation-Version': version
+    }
+}
+
+task sourceJar(type: Jar) {
+    from sourceSets.main.allJava
+}
+
+publishing {
+    publications {
+        BintrayRelease(MavenPublication) {
+            from components.java
+            groupId group
+            artifactId archivesBaseName
+
+            artifact sourceJar {
+                classifier 'sources'
+            }
+        }
+    }
+}
+
+bintray {
+    version = "${versionObj}"
+    user = getProjectProperty("bintrayUsername")
+    key = getProjectProperty("bintrayApiKey")
+    publications = ["BintrayRelease"]
+    pkg {
+        repo = 'maven'
+        name = project.name
+        licenses = ['Apache-2.0']
+        vcsUrl = 'https://github.com/natanbc/lavaplayer-arm-natives.git'
+        publish = true
+        version {
+            name = project.version.toString()
+            released = new Date()
+        }
+    }
+}
+
+String getProjectProperty(String propertyName) {
+    String property = ""
+    if(hasProperty(propertyName)) {
+        property = project.properties[propertyName]
+    }
+    return property
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '4.10.2'
+}
+
+bintrayUpload {
+    dependsOn build
+
+    onlyIf { !getProjectProperty("bintrayUsername").empty }
+    onlyIf { !getProjectProperty("bintrayApiKey").empty }
+}
+
+class Version {
+    String major, minor, revision
+
+
+    String toString() {
+        "${major}.${minor}" + (revision == "0" ? "" : ".${revision}")
+    }
+}
