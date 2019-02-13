@@ -11,7 +11,7 @@ Maven:
   <repository>
     <id>whatever</id>
     <name>whatever</name>
-    <url>https://dl.bintray.com/natanbc/mave</url>
+    <url>https://dl.bintray.com/natanbc/maven</url>
   </repository>
 </repositories>
 
